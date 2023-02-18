@@ -1,7 +1,6 @@
 reset
 set nokey       # Désactive la légende
-set term gif animate delay 4 size 854,480   # délai de (4*0.01)s entre chaque image => 1/0.04=25 images/sec
-# gif de 854*480 pixels
+set term gif animate delay 4 size 854,480   # délai de (4*0.01)s entre chaque image => 1/0.04=25 images/sec, gif de 854*480 pixels
 
 set output 'traj_pend_simple.gif'       # nom du fichier .gif
 
@@ -35,8 +34,7 @@ label(a, b, c, d, e) = sprintf("\
 {/Times:Italic dt}   = %.2f s\n\
 {/symbol-oblique q_{/Times:Normal 0}}  = %3.2f °\n", a, b, c, d, e)
 
-# sprintf convertit en chaîne de caractères et format "%5.2f" = champ à 5 espaces
-# (2 décimales, 1 pt, 2 chiffres partie entière)
+# sprintf convertit en chaîne de caractères et format "%5.2f" = champ à 5 espaces (2 décimales, 1 pt, 2 chiffres partie entière)
 
 #-----------------------POSITION INITIALE-----------------------
 # Première boucle pour figer l'image à la position initiale
