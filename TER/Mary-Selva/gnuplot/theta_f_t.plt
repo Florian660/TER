@@ -1,5 +1,5 @@
 set nokey 
-set title "Pendule simple - Euler - theta=f(t)"
+set title "Pendule simple - Euler Explicite - theta=f(t)"
 set autoscale
 set xlabel "Temps (s)"
 set ylabel "Theta (deg)"
