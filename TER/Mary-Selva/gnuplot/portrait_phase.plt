@@ -1,3 +1,4 @@
+set nokey 
 set title "Pendule simple - Euler - dtheta=f(theta)"
 set autoscale
 set xlabel "Theta (deg)"
