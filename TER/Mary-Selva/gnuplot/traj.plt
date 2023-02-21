@@ -1,5 +1,5 @@
 set nokey 
-set title "Pendule simple - Euler - y=f(x)"
+set title "Pendule simple - Euler Explicite - y=f(x)"
 unset autoscale x
 unset autoscale y
 set xrange [-0.07:0.07]
