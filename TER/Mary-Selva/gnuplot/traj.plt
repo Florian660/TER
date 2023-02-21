@@ -1,3 +1,4 @@
+set nokey 
 set title "Pendule simple - Euler - y=f(x)"
 unset autoscale x
 unset autoscale y
