@@ -1,0 +1,40 @@
+# -*- coding: utf8 -*-
+import numpy, math, matplotlib
+from pylab import *
+import matplotlib.pyplot as plt
+t, dt, tmax = 0 , 0.02 , 3     #initialisation des termes de temps  
+T = [0]                   #initialisation d'une liste avec les dates
+x0 = 0                  #initialisation de la position   
+x=[x0]                   #initialisation d'une liste avec les positions
+v0 = 0.5 #initialisation de la vitesse
+v=[v0] #initialisation d'une liste avec les vitesse
+fichier=open("euler-oscillateur.txt",'w') #ouverture du fichier pour stocker liste de points
+
+while t < tmax: #tant que la date est inferieur à la date max
+   t = t + dt   #on ajoute le pas à la date precedente pour créer la date t+1
+   T.append(round(t,2)) # on rentre la nouvelle date à la fin de la liste des dates 
+   x1 = x0 + v0*dt #on calcule la position à t+1
+   v1 = v0 + (-40*sin(x1)*dt) #on calcule la vitesse à t+1     
+   x0 = x1  #on remplace la position à t par la position à t+1
+   x.append(round(x1,2)) #on rentre la nouvelle position à la la fin de la liste des positions
+   v0 = v1  #on remplace la position à t par la position à t+1
+   v.append(round(v1,2))   #on rentre la nouvelle vitesse à la la fin de la liste des vitesses
+   fichier.write(str(t)+"\t"+str(round(x1,2))+"\t"+str(round(v1,2))+"\n") #on ecrit la date, position et vitesse à t+1 dans le fichier
+    
+fichier.close() # on ferme le fichier de stockage
+    
+# print T,x,v # on affiche les points de mesure
+
+plt.plot(T,x,"b-x", label="position") # on  trace la position en fonction du temps : b pour bleu ; - pour ligne continue ; x pour les marqueurs en croix
+plt.plot(T,v,"r-x", label="vitesse") # on trace la vitesse en fonction du temps en rouge    
+plt.xlabel("temps") #nom de l'axe des abscisses
+plt.legend() # on affiche les légende
+plt.savefig('eulerimp-oscillateur.pdf', format='pdf')   #on enregistre le graphique dans un fichier pdf
+
+plt.axis([0,3,-0.75,0.75])
+#trac de la ligne de l'axe Ox
+plt.axhline(linewidth=5, color='k') 
+# plt.text(2,1, r'$x\mapsto\sin(x)$', color='k')
+
+
+plt.show()
