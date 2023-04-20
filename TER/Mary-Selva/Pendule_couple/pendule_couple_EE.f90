@@ -2,7 +2,7 @@ program pendule_couple
 
     implicit none
 
-    integer, parameter :: n = 50000 ! nombre d'iterations
+    integer, parameter :: n = 5000 ! nombre d'iterations
     integer, parameter :: PR = 8
     real(PR), parameter :: pi = 4._PR*atan(1._PR)
     integer :: i
@@ -40,11 +40,11 @@ program pendule_couple
 
         t = i * dt
 
-        ! Calcul de alpha1 et alpha2
+        ! Calcul de acc1 et acc2
         acc1 = (-g/L1) * sin(theta1) + (C/(m1*L1**2)) * (theta2 - theta1)
         acc2 = (-g/L2) * sin(theta2) + (C/(m2*L2**2)) * (theta1 - theta2)
 
-        ! Mise a jour de omega1 et omega2
+        ! Mise a jour de vit1 et vit2
         vit1 = vit1 + acc1 * dt
         vit2 = vit2 + acc2 * dt
 
