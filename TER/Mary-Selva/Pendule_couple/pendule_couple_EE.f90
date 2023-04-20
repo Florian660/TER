@@ -59,8 +59,8 @@ program pendule_couple
         y2 = -L2 * cos(theta2)
 
         ! Calcul de l'énergie cinétique et de l'énergie potentielle
-        Ec1 = 0.5 * m1 * L1**2 * vit1**2
-        Ec2 = 0.5 * m2 * L2**2 * vit2**2
+        Ec1 = 0.5 * m1 * vit1**2
+        Ec2 = 0.5 * m2 * vit2**2
         Ep1 = - m1 * g * L1 * cos(theta1)
         Ep2 = - m2 * g * L2 * cos(theta2)
 
