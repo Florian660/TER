@@ -1,7 +1,11 @@
-set title "euler"
+set title "Position angulaire du pendule simple en fonction du temps"
 set autoscale 
-set xlabel "time in sec "
-set ylabel "x"
-m= "./euler.dat"
+set xlabel "Temps"
+set ylabel "Position angulaire"
+
+
+n="./euler_explicite.dat"
+
+
 set grid 
-plot m using 1:2 with linespoints 
+plot n using 1:2 w l
