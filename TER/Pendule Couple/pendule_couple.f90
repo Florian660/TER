@@ -4,26 +4,55 @@ program couple
 
     integer, parameter :: PR=8
     real(PR), parameter :: PI=4._PR*ATAN(1._PR)
-    integer :: N,i
+    integer :: N,i,meth
     real(kind=PR) :: m1,m2,g,l1,l2,C,to,T,thetao1,vto1,thetao2,vto2
     real(kind=PR), dimension(:), allocatable :: ti,theta1,pt1,theta2,pt2,coord_xt1,coord_yt1,coord_xt2,coord_yt2
+    real(kind=PR), dimension(:), allocatable :: emi
     
    
 
     open(unit=1,file="parametres_3.dat",action="read")
-    read(1,*) m1,m2,g,l1,l2,C,to,T,thetao1,vto1,thetao2,vto2,N
+    read(1,*) m1,m2,g,l1,l2,C,to,T,thetao1,vto1,thetao2,vto2,N,meth
 
-    allocate(ti(N+1),theta1(N+1),pt1(N+1),theta2(N+1),pt2(N+1),coord_xt1(N+1),coord_yt1(N+1),coord_xt2(N+1),coord_yt2(N+1))
-    call euler_implicite_nl(m1,m2,g,l1,l2,C,to,T,thetao1,vto1,thetao2,vto2,N,ti,theta1,pt1,theta2,pt2)
-    call traject_cart(l1,theta1,theta2,coord_xt1,coord_yt1,coord_xt2,coord_yt2)
-    open(unit=4,file='euler_implicite.dat',action='write')
-    
-    
-    do i=1,N+1 
-        write(4,*) theta1(i),pt1(i)/(m1*(l1**2)),theta2(i),pt2(i)/(m2*(l2**2)), &
-        coord_xt1(i),coord_yt1(i),coord_xt2(i),coord_yt2(i)
-        
-    end do
+    select case(meth)
+    case(1)
+        allocate(ti(N+1),theta1(N+1),pt1(N+1),theta2(N+1),pt2(N+1),coord_xt1(N+1),coord_yt1(N+1),coord_xt2(N+1),coord_yt2(N+1), &
+        emi(N+1))
+        call euler_implicite_nl(m1,m2,g,l1,l2,C,to,T,thetao1,vto1,thetao2,vto2,N,ti,theta1,pt1,theta2,pt2,emi)
+        call traject_cart(l1,theta1,theta2,coord_xt1,coord_yt1,coord_xt2,coord_yt2)
+        open(unit=3,file='euler_implicite1.dat',action='write')
+        open(unit=4,file='euler_implicite2.dat',action='write')
+        do i=1,N+1 
+            write(3,*) ti(i),theta1(i)*180._PR/PI,pt1(i)/(m1*(l1**2)),coord_xt1(i),coord_yt1(i),emi(i)
+            write(4,*) ti(i),theta2(i)*180._PR/PI,pt2(i)/(m2*(l2**2)),coord_xt2(i),coord_yt2(i),emi(i)
+        end do
+    case(2)
+        allocate(ti(N+1),theta1(N+1),pt1(N+1),theta2(N+1),pt2(N+1),coord_xt1(N+1),coord_yt1(N+1),coord_xt2(N+1),coord_yt2(N+1), &
+        emi(N+1))
+        call euler_symplectique(m1,m2,g,l1,l2,C,to,T,thetao1,vto1,thetao2,vto2,N,ti,theta1,pt1,theta2,pt2,emi)
+        call traject_cart(l1,theta1,theta2,coord_xt1,coord_yt1,coord_xt2,coord_yt2)
+        open(unit=5,file='euler_symplectique1.dat',action='write')
+        open(unit=6,file='euler_symplectique2.dat',action='write')
+        do i=1,N+1 
+            write(5,*) ti(i),theta1(i)*180._PR/PI,pt1(i)/(m1*(l1**2)),coord_xt1(i),coord_yt1(i),emi(i)
+            write(6,*) ti(i),theta2(i)*180._PR/PI,pt2(i)/(m2*(l2**2)),coord_xt2(i),coord_yt2(i),emi(i)
+        end do
+    case(3)
+        allocate(ti(N+1),theta1(N+1),pt1(N+1),theta2(N+1),pt2(N+1),coord_xt1(N+1),coord_yt1(N+1),coord_xt2(N+1),coord_yt2(N+1),&
+        emi(N+1))
+        call euler_explicite(m1,m2,g,l1,l2,C,to,T,thetao1,vto1,thetao2,vto2,N,ti,theta1,pt1,theta2,pt2,emi)
+        call traject_cart(l1,theta1,theta2,coord_xt1,coord_yt1,coord_xt2,coord_yt2)
+        open(unit=7,file='euler_explicite1.dat',action='write')
+        open(unit=8,file='euler_explicite2.dat',action='write')
+        do i=1,N+1 
+            !write(7,*) ti(i),theta1(i)*180._PR/PI,pt1(i)/(m1*(l1**2)),coord_xt1(i),coord_yt1(i),emi(i)
+            write(7,*) ti(i),emi(i)
+            write(8,*) ti(i),theta2(i)*180._PR/PI,pt2(i)/(m2*(l2**2)),coord_xt2(i),coord_yt2(i),emi(i)
+        end do
+    case default 
+        print*, "tapez 1"
+    end select 
+
 
     
     
@@ -97,10 +126,10 @@ contains
 
     end subroutine
 
-    subroutine euler_implicite_nl(m1,m2,g,l1,l2,C,to,T,thetao1,vto1,thetao2,vto2,N,ti,theta1,pt1,theta2,pt2)
+    subroutine euler_implicite_nl(m1,m2,g,l1,l2,C,to,T,thetao1,vto1,thetao2,vto2,N,ti,theta1,pt1,theta2,pt2,emi)
         integer, intent(in) :: N !nombre de sous-intervalles 
         real(kind=PR), intent(in) :: m1,m2,g,l1,l2,C,to,T,thetao1,vto1,thetao2,vto2 
-        real(kind=PR), dimension(N+1), intent(out) :: ti,theta1,pt1,theta2,pt2
+        real(kind=PR), dimension(N+1), intent(out) :: ti,theta1,pt1,theta2,pt2,emi
 
         integer :: i 
         real(kind=PR) :: h
@@ -122,6 +151,8 @@ contains
         pt1(1)=m1*(l1**2)*vto1
         pt2(1)=m2*(l2**2)*vto2
         ti(1)=to
+        emi(1)=((pt1(1)**2)/(m1*(l1**2))+(pt2(1)**2)/(m2*(l2**2)))/2._PR+g*(m1*l1*(1-COS(thetao1))+m2*l2*(1-COS(thetao2)))+ &
+        (C*(thetao1-thetao2)**2)/2._PR
 
         !initialisation de Id,J et X
         Id=0._PR
@@ -141,10 +172,10 @@ contains
             !je change les valeurs de FX et certaines valeurs de J car elles dependent de theta1,2 et pt1,2
             FX(1)=pt1(i-1)/(m1*(l1**2))
             FX(2)=pt2(i-1)/(m2*(l2**2))
-            FX(3)=-m1*g*l1*sin(theta1(i-1)*PI/180._PR)-C*(theta1(i-1)-theta2(i-1))
-            FX(4)=-m2*g*l2*sin(theta2(i-1)*PI/180._PR)+C*(theta1(i-1)-theta2(i-1))
-            J(3,1)=-m1*g*l1*cos(theta1(i-1)*PI/180._PR)-C 
-            J(4,2)=-m2*g*l2*cos(theta2(i-1)*PI/180._PR)-C 
+            FX(3)=-m1*g*l1*sin(theta1(i-1))-C*(theta1(i-1)-theta2(i-1))
+            FX(4)=-m2*g*l2*sin(theta2(i-1))+C*(theta1(i-1)-theta2(i-1))
+            J(3,1)=-m1*g*l1*cos(theta1(i-1))-C 
+            J(4,2)=-m2*g*l2*cos(theta2(i-1))-C 
 
             ti(i)=ti(i-1)+h
             A=Id-J 
@@ -158,9 +189,77 @@ contains
             theta2(i)=X(2)
             pt1(i)=X(3)
             pt2(i)=X(4)
+            !on calcule l'énergie avec les valeurs obtenues 
+            emi(i)=((pt1(i)**2)/(m1*(l1**2))+(pt2(i)**2)/(m2*(l2**2)))/2._PR+g*(m1*l1*(1-COS(theta1(i)))+m2*l2*(1-COS(theta2(i))))&
+            +(C*(theta1(i)-theta2(i))**2)/2._PR
         end do 
 
     end subroutine euler_implicite_nl 
+
+    subroutine euler_symplectique(m1,m2,g,l1,l2,C,to,T,thetao1,vto1,thetao2,vto2,N,ti,theta1,pt1,theta2,pt2,emi)
+        integer, intent(in) :: N !nombre de sous-intervalles 
+        real(kind=PR), intent(in) :: m1,m2,g,l1,l2,C,to,T,thetao1,vto1,thetao2,vto2 
+        real(kind=PR), dimension(N+1), intent(out) :: ti,theta1,pt1,theta2,pt2,emi
+
+        integer :: i 
+        real(kind=PR) :: h
+
+        !définition de mon pas de temps et initialisation 
+        h=(T-to)/N 
+        theta1(1)=thetao1
+        theta2(1)=thetao2
+        pt1(1)=m1*(l1**2)*vto1
+        pt2(1)=m2*(l2**2)*vto2
+        ti(1)=to
+        emi(1)=((pt1(1)**2)/(m1*(l1**2))+(pt2(1)**2)/(m2*(l2**2)))/2._PR+g*(m1*l1*(1-COS(thetao1))+m2*l2*(1-COS(thetao2)))+ &
+        (C*(thetao1-thetao2)**2)/2._PR
+
+
+        do i=2,N+1
+            ti(i)=ti(i-1)+h
+            theta1(i)=theta1(i-1)+h*pt1(i-1)/(m1*(l1**2))
+            theta2(i)=theta2(i-1)+h*pt2(i-1)/(m2*(l2**2))
+            pt1(i)=pt1(i-1)-h*(g*m1*l1*SIN(theta1(i))+C*(theta1(i)-theta2(i)))
+            pt2(i)=pt2(i-1)-h*(g*m2*l2*SIN(theta2(i))-C*(theta1(i)-theta2(i)))
+            emi(i)=((pt1(i)**2)/(m1*(l1**2))+(pt2(i)**2)/(m2*(l2**2)))/2._PR+g*(m1*l1*(1-COS(theta1(i)))+m2*l2*(1-COS(theta2(i))))&
+            +(C*(theta1(i)-theta2(i))**2)/2._PR
+        end do 
+
+
+
+    end subroutine euler_symplectique 
+
+    subroutine euler_explicite(m1,m2,g,l1,l2,C,to,T,thetao1,vto1,thetao2,vto2,N,ti,theta1,pt1,theta2,pt2,emi)
+        integer, intent(in) :: N !nombre de sous-intervalles 
+        real(kind=PR), intent(in) :: m1,m2,g,l1,l2,C,to,T,thetao1,vto1,thetao2,vto2 
+        real(kind=PR), dimension(N+1), intent(out) :: ti,theta1,pt1,theta2,pt2,emi
+
+        integer :: i 
+        real(kind=PR) :: h
+
+        !définition de mon pas de temps et initialisation 
+        h=(T-to)/N 
+        theta1(1)=thetao1
+        theta2(1)=thetao2
+        pt1(1)=m1*(l1**2)*vto1
+        pt2(1)=m2*(l2**2)*vto2
+        ti(1)=to
+        emi(1)=((pt1(1)**2)/(m1*(l1**2))+(pt2(1)**2)/(m2*(l2**2)))/2._PR+g*(m1*l1*(1-COS(thetao1))+m2*l2*(1-COS(thetao2)))+ &
+        (C*(thetao1-thetao2)**2)/2._PR
+
+        do i=2,N+1
+            ti(i)=ti(i-1)+h
+            theta1(i)=theta1(i-1)+h*pt1(i-1)/(m1*(l1**2))
+            theta2(i)=theta2(i-1)+h*pt2(i-1)/(m2*(l2**2))
+            pt1(i)=pt1(i-1)-h*(g*m1*l1*SIN(theta1(i-1)*PI/180._PR)+C*(theta1(i-1)-theta2(i-1)))
+            pt2(i)=pt2(i-1)-h*(g*m2*l2*SIN(theta2(i-1)*PI/180._PR)-C*(theta1(i-1)-theta2(i-1)))
+            emi(i)=((pt1(i)**2)/(m1*(l1**2))+(pt2(i)**2)/(m2*(l2**2)))/2._PR+g*(m1*l1*(1-COS(theta1(i)))+m2*l2*(1-COS(theta2(i))))&
+            +(C*(theta1(i)-theta2(i))**2)/2._PR
+        end do 
+
+
+
+    end subroutine euler_explicite
 
     subroutine traject_cart(R,theta1,theta2,coord_xt1,coord_yt1,coord_xt2,coord_yt2)
         ! Trace la trajectoire de l'objet dans un repère cartésien (initialement polaire).
